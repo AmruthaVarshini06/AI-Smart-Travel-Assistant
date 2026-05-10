@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Map from "@/components/Map";
 import MapView from "@/components/MapView";
@@ -11,9 +11,10 @@ import SearchForm from '@/components/travel/SearchForm';
 import AIInsights from '@/components/travel/AIInsights';
 import RouteDetails from '@/components/travel/RouteDetails';
 import { WeatherWidget, PricePrediction } from '@/components/travel/TravelWidgets';
-import { WeatherCondition, TravelRoute } from '@/lib/mock-data';
-import { fetchTravelPlan } from '@/lib/api';
 import { showError, showSuccess } from '@/utils/toast';
+import { getBusData, getTrainData, getFlightData,} from "@/services/travel";
+import { TravelRoute, WeatherCondition,} from "@/types/travel";
+import { buildSmartRoutes } from "@/utils/routePlanner";
 
 const Index = () => {
   const [travelStyle] = React.useState<'balanced' | 'fastest' | 'cheapest'>('balanced');
@@ -22,46 +23,63 @@ const Index = () => {
   const [routes, setRoutes] = React.useState<TravelRoute[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [selectedRoute, setSelectedRoute] = React.useState<TravelRoute | null>(null);
+
   const [searchParams, setSearchParams] = React.useState({ 
     source: 'Hyderabad', 
     dest: 'Bangalore',
     date: new Date().toISOString().split('T')[0]
   });
 
-  const loadRoutes = React.useCallback(async () => {
+
+  useEffect(() => {
+  async function loadDynamicRoutes() {
     setIsLoading(true);
+
     try {
-      const data = await fetchTravelPlan({
-        source: searchParams.source,
-        destination: searchParams.dest,
-        distance: distance[0],
-        style: travelStyle,
-        weather: weather
-      });
-      
-      // Sort routes: Recommended (Best Choice) first
-      const sortedData = [...data].sort((a, b) => {
-        if (a.type === 'recommended') return -1;
-        if (b.type === 'recommended') return 1;
-        return 0;
-      });
-      
-      setRoutes(sortedData);
-    } catch (err) {
-      showError("Failed to fetch travel plans");
+      const buses = await getBusData(
+      searchParams.source,
+      searchParams.dest
+    );
+
+    const trains = await getTrainData(
+      searchParams.source,
+      searchParams.dest
+    );
+
+    const flights = await getFlightData(
+      searchParams.source,
+      searchParams.dest
+    );
+
+    console.log("BUSES:", buses);
+    console.log("TRAINS:", trains);
+    console.log("FLIGHTS:", flights);
+    
+    const smartRoutes = buildSmartRoutes(
+      buses,
+      trains,
+      flights,
+      searchParams.source,
+      searchParams.dest
+    );
+
+    setRoutes(smartRoutes);
+
+    } catch (error) {
+      console.error(error);
+      showError("Failed to load routes");
     } finally {
       setIsLoading(false);
     }
-  }, [distance, travelStyle, weather, searchParams]);
+  }
+
+  loadDynamicRoutes();
+}, [searchParams]);
 
   const handleSearch = (source: string, dest: string, date: string = searchParams.date) => {
     setSearchParams(prev => ({ ...prev, source, dest, date }));
     showSuccess(`Searching routes from ${source} to ${dest}`);
   };
-
-  React.useEffect(() => {
-    loadRoutes();
-  }, [searchParams, loadRoutes]);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col">
@@ -70,9 +88,6 @@ const Index = () => {
       <main className="flex-1 pt-24 pb-12 px-4 lg:px-8 container mx-auto max-w-7xl">
         <DashboardHeader />
 
-        <div className="my-8">
-          <Map />
-        </div>
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
           {/* Left Column: Search and Routes */}
           <div className="xl:col-span-8 flex flex-col gap-8">

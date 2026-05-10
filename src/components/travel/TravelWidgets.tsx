@@ -3,7 +3,7 @@
 import React from 'react';
 import { CloudRain, Wind, Droplets, TrendingUp, AlertCircle, Leaf } from 'lucide-react';
 import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, AreaChart, Area } from 'recharts';
-import { PRICE_TRENDS, DELAY_DATA } from '@/lib/mock-data';
+import { PRICE_TRENDS, DELAY_DATA } from "@/types/travel";
 
 export const WeatherWidget = () => (
   <div className="glass-card p-6 rounded-[2rem] space-y-6">

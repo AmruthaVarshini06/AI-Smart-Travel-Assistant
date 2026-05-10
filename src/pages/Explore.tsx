@@ -70,9 +70,6 @@ const Explore = () => {
           <p className="text-slate-500 text-sm">Discover trending places optimized for your travel style.</p>
         </div>
 
-        <div className="w-full">
-          <Map />
-        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {destinations.map((dest, idx) => (
