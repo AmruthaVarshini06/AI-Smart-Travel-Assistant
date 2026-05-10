@@ -4,16 +4,18 @@ import React, { useEffect, useState } from "react";
 
 import {
   MapContainer,
-TileLayer,
-Marker,
-Popup,
-useMap,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
 } from "react-leaflet";
-import "leaflet-routing-machine";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
-import L from "leaflet";
+
 import "leaflet/dist/leaflet.css";
 
+import L from "leaflet";
+
+import "leaflet-routing-machine";
+import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
 interface InteractiveMapProps {
   source?: string;
@@ -33,11 +35,13 @@ function Routing({
   useEffect(() => {
     if (!map) return;
 
-    const routingControl = L.Routing.control({
+    const routingControl: any = (L.Routing.control as any)({
       waypoints: [
         L.latLng(sourceCoords[0], sourceCoords[1]),
         L.latLng(destinationCoords[0], destinationCoords[1]),
       ],
+
+      routeWhileDragging: false,
 
       lineOptions: {
         styles: [
@@ -55,7 +59,13 @@ function Routing({
     }).addTo(map);
 
     return () => {
-      map.removeControl(routingControl);
+      try {
+        if (routingControl) {
+          map.removeControl(routingControl);
+        }
+      } catch (error) {
+        console.log("Routing cleanup skipped");
+      }
     };
   }, [map, sourceCoords, destinationCoords]);
 
@@ -74,30 +84,30 @@ const InteractiveMap = ({
   const [destinationCoords, setDestinationCoords] = useState<
     [number, number] | null
   >(null);
- 
+
   async function getCoordinates(place: string) {
-  try {
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?countrycodes=in&q=${encodeURIComponent(
-        place
-      )}&format=jsonv2`
-    );
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?countrycodes=in&q=${encodeURIComponent(
+          place
+        )}&format=jsonv2`
+      );
 
-    const data = await response.json();
+      const data = await response.json();
 
-    console.log("ROUTE DATA:", data);
+      console.log("ROUTE DATA:", data);
 
-    if (!data.length) return null;
+      if (!data.length) return null;
 
-    return [
-      Number(data[0].lat),
-      Number(data[0].lon),
-    ] as [number, number];
-  } catch (error) {
-    console.error(error);
-    return null;
+      return [
+        Number(data[0].lat),
+        Number(data[0].lon),
+      ] as [number, number];
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
-}
 
   useEffect(() => {
     async function fetchCoordinates() {
@@ -119,14 +129,13 @@ const InteractiveMap = ({
     fetchCoordinates();
   }, [source, destination]);
 
-
   if (!sourceCoords || !destinationCoords) {
-  return (
-    <div className="flex items-center justify-center w-full h-full bg-slate-100 rounded-[2rem] text-black">
-      Unable to load map coordinates
-    </div>
-  );
-}
+    return (
+      <div className="flex items-center justify-center w-full h-full bg-slate-100 rounded-[2rem] text-black">
+        Unable to load map coordinates
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-[100%] min-h-[400px] rounded-[2rem] overflow-hidden">
@@ -138,7 +147,6 @@ const InteractiveMap = ({
           width: "100%",
         }}
       >
-        {/* Map Layer */}
         <TileLayer
           url={
             isSatellite
@@ -148,14 +156,12 @@ const InteractiveMap = ({
           attribution="&copy; OpenStreetMap contributors"
         />
 
-        {/* Source Marker */}
         <Marker position={sourceCoords}>
           <Popup>
             <strong>Source:</strong> {source}
           </Popup>
         </Marker>
 
-        {/* Destination Marker */}
         <Marker position={destinationCoords}>
           <Popup>
             <strong>Destination:</strong> {destination}
@@ -166,10 +172,8 @@ const InteractiveMap = ({
           sourceCoords={sourceCoords}
           destinationCoords={destinationCoords}
         />
+      </MapContainer>
 
-        </MapContainer>
-
-      {/* Legend */}
       <div className="absolute bottom-4 left-4 z-[1000] bg-white p-4 rounded-2xl shadow-lg border border-slate-200">
         <h4 className="font-bold text-sm mb-3">
           Transportation Modes

@@ -31,11 +31,6 @@ import InteractiveMap from "./InteractiveMap";
 
 import { cn } from "@/lib/utils";
 
-import {
-  TravelRoute,
-  TransportMode,
-} from "@/lib/mock-data";
-
 interface RouteDetailsProps {
   route: TravelRoute | null;
   isOpen: boolean;

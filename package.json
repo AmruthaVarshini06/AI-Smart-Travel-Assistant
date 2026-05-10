@@ -53,6 +53,7 @@
     "embla-carousel-react": "^8.3.0",
     "express": "^5.2.1",
     "framer-motion": "^12.38.0",
+    "geolib": "^3.3.14",
     "input-otp": "^1.2.4",
     "leaflet": "^1.9.4",
     "leaflet-routing-machine": "^3.2.12",
