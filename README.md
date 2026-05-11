@@ -37,23 +37,28 @@ This makes travel planning faster, smarter, and more reliable.
 
 
 ## 🧰 Technologies Used
-Frontend:
-React.js
-JavaScript
-Tailwind CSS
-Backend:
-Node.js
-Express.js
-Database:
-MongoDB
-AI / ML:
-Python (Machine Learning models for prediction)
-APIs Integrated:
-Weather API (real-time weather updates)
-Maps API (route visualization)
-Transportation APIs (bus, train, flight data)
-Authentication:
-JWT (JSON Web Token)
+### Frontend:
+* React.js
+* JavaScript
+* Tailwind CSS
+
+### Backend:
+* Node.js
+* Express.js
+  
+### Database:
+* MongoDB
+  
+### AI / ML:
+* Python (Machine Learning models for prediction)
+  
+### APIs Integrated:
+* Weather API (real-time weather updates)
+* Maps API (route visualization)
+* Transportation APIs (bus, train, flight data)
+  
+### Authentication:
+* JWT (JSON Web Token)
 
 
 ## 🏗️ System Architecture
@@ -88,22 +93,22 @@ Processed Response Returned
 Frontend Displays Optimized Travel Plan
 
 ## 📌 In-Scope Features
-Travel route search and optimization
-Integration of bus, train, and flight services
-AI-based travel time and weather prediction
-Tourist place recommendations
-Route booking and trip management
-Interactive map visualization
-Real-time travel updates
-Secure authentication using JWT
+* Travel route search and optimization
+* Integration of bus, train, and flight services
+* AI-based travel time and weather prediction
+* Tourist place recommendations
+* Route booking and trip management
+* Interactive map visualization
+* Real-time travel updates
+* Secure authentication using JWT
 
 ## 🚫 Out-of-Scope Features
-International transportation systems
-Hotel and food booking services
-Real-time GPS tracking
-Enterprise-level integrations
-Advanced chatbot assistance
-Offline travel planning
+* International transportation systems
+* Hotel and food booking services
+* Real-time GPS tracking
+* Enterprise-level integrations
+* Advanced chatbot assistance
+* Offline travel planning
 
 ## 🚀 Future Enhancements
 * 🌙 Dark mode and UI customization
