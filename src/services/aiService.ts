@@ -1,73 +1,146 @@
 "use client";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+import { TravelRoute, WeatherCondition } from '@/types/travel';
+import axios from 'axios';
 
-export const aiApi = {
-  chat: (message: string) => api.post('/gemini/chat', { message }),
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+
+// Create axios instance with better error handling
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 60000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Response interceptor for better error logging
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('❌ [Frontend] Axios Error Details:');
+    console.error('   Status:', error.response?.status);
+    console.error('   Message:', error.response?.data?.message);
+    console.error('   Data:', error.response?.data);
+    console.error('   Error Code:', error.code);
+    
+    if (error.code === 'ECONNREFUSED' || error.message.includes('ERR_NETWORK')) {
+      console.error('❌ [Frontend] Network Error: Cannot reach backend at', API_BASE_URL);
+      console.error('📍 Make sure backend is running on port 5000');
+    }
+    
+    if (error.code === 'ENOTFOUND') {
+      console.error('❌ [Frontend] DNS Error: Cannot resolve backend host');
+    }
+    
+    if (error.code === 'ETIMEDOUT') {
+      console.error('❌ [Frontend] Timeout: Backend took too long to respond');
+    }
+    
+    return Promise.reject(error);
+  }
+);
+
+export const getAIRecommendation = (routes: TravelRoute[], weather: WeatherCondition) => {
+  if (weather === 'Storm') {
+    return routes.find(r => r.segments.every(s => s.mode !== 'flight')) || routes[0];
+  }
+  
+  return routes.reduce((prev, current) => {
+    const prevScore = prev.reliabilityScore * 0.6 + (10000 / prev.totalCost) * 0.4;
+    const currScore = current.reliabilityScore * 0.6 + (10000 / current.totalCost) * 0.4;
+    return currScore > prevScore ? current : prev;
+  });
 };
 
-const SYSTEM_PROMPT = `
-You are an AI Travel Assistant for a travel planning application.
-
-YOUR ROLE:
-- Help users plan trips.
-- Suggest tourist places.
-- Recommend stops along travel routes.
-- Provide travel tips, budget ideas, and best times to visit.
-
-INSTRUCTIONS:
-- If the user gives a source and destination, suggest interesting places and stops along that specific route.
-- Recommend top attractions, hidden gems, and local food spots.
-- Keep your answers short, clear, and helpful.
-- Always ask follow-up questions to better understand the user's needs.
-
-Always use Markdown for clear formatting.
-`;
-
 export const processChatQuery = async (query: string): Promise<string> => {
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('VITE_GEMINI_API_KEY');
-
-  if (!apiKey || apiKey === 'placeholder-key' || apiKey.trim() === '') {
-    return "⚠️ **API Key Missing**: Please add your Gemini API Key in the **Profile** settings to enable live AI responses.\n\n[Get a free key here](https://aistudio.google.com/app/apikey)";
-  }
-
+  const startTime = Date.now();
+  
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    console.log('═'.repeat(80));
+    console.log('📤 [Frontend] Sending message to backend:', query);
+    console.log('📡 [Frontend] API Base URL:', API_BASE_URL);
+    console.log('═'.repeat(80));
+    
+    // Check if backend is reachable first
+    try {
+      console.log('🔍 [Frontend] Checking backend health...');
+      const healthResponse = await axios.get(`${API_BASE_URL}/health`, { timeout: 5000 });
+      console.log('✅ [Frontend] Backend is healthy:', healthResponse.status);
+    } catch (healthError: any) {
+      console.warn('⚠️ [Frontend] Backend health check failed:', healthError.message);
+      console.warn('⚠️ [Frontend] Backend might be down, attempting chat anyway...');
+    }
+    
+    // Call the backend Gemini API for real AI responses
+    const response = await apiClient.post(
+      '/api/gemini/chat',
+      { message: query },
       {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `${SYSTEM_PROMPT}\n\nUser Message: ${query}`
-                }
-              ]
-            }
-          ]
-        })
+        timeout: 60000 // 60 second timeout for longer responses
       }
     );
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || "Failed to connect to Gemini API");
+    const elapsedTime = Date.now() - startTime;
+    console.log('═'.repeat(80));
+    console.log('✅ [Frontend] Response received:', response.status, response.statusText);
+    console.log('⏱️ [Frontend] Response time:', elapsedTime, 'ms');
+    console.log('═'.repeat(80));
+    
+    // Extract the response data
+    if (response.data?.success && response.data?.data) {
+      const responseText = response.data.data;
+      const responseLength = responseText.length;
+      
+      console.log('📊 [Frontend] Response length:', responseLength, 'characters');
+      console.log('📥 [Frontend] AI response full text:');
+      console.log('═'.repeat(80));
+      console.log(responseText);
+      console.log('═'.repeat(80));
+      
+      return responseText;
     }
-
-    const data = await response.json();
-    const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!aiResponse) {
-      throw new Error("Empty response from AI model");
-    }
-
-    return aiResponse;
+    
+    console.error('❌ [Frontend] Invalid response format:', response.data);
+    throw new Error(`Invalid response format: ${JSON.stringify(response.data)}`);
   } catch (error: any) {
-    console.error("AI Service Error:", error);
-    return `❌ **Assistant Error**: ${error.message}. Please verify your API key in Profile settings.`;
+    console.error('═'.repeat(80));
+    console.error('❌ [Frontend] Chat API Error Occurred');
+    console.error('═'.repeat(80));
+    
+    // Better error messages for different scenarios
+    let errorMsg = 'Unknown error occurred';
+    
+    if (error.response?.data?.message) {
+      // Backend returned an error
+      errorMsg = error.response.data.message;
+      console.error('📤 [Backend Error]:', errorMsg);
+    } else if (error.code === 'ECONNREFUSED') {
+      // Connection refused - backend not running
+      errorMsg = `Cannot reach backend at ${API_BASE_URL}. Make sure the backend server is running on port 5000.`;
+      console.error('🔴 [Connection Error]:', errorMsg);
+      console.error('💡 [Solution] Run: npm run server (in backend directory)');
+    } else if (error.code === 'ENOTFOUND') {
+      // DNS error
+      errorMsg = `Cannot resolve backend host. Check your network connection.`;
+      console.error('🔴 [DNS Error]:', errorMsg);
+    } else if (error.code === 'ETIMEDOUT') {
+      // Timeout
+      errorMsg = `Backend is not responding. It might be overloaded or the API key might be invalid.`;
+      console.error('⏱️ [Timeout Error]:', errorMsg);
+    } else if (error.message.includes('Network Error')) {
+      // Network error
+      errorMsg = `Network error: ${error.message}. Check your internet connection.`;
+      console.error('🌐 [Network Error]:', errorMsg);
+    } else {
+      errorMsg = error?.message || 'Failed to get AI response';
+      console.error('❌ [Error Message]:', errorMsg);
+    }
+    
+    console.error('📋 [Error Details]:', error);
+    console.error('═'.repeat(80));
+    
+    // Re-throw with improved message
+    throw new Error(`${errorMsg}`);
   }
 };
