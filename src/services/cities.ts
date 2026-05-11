@@ -1,44 +1,23 @@
-import { supabase } from "@/lib/supabase";
+import axios from "axios";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5000/api";
 
 export async function getAllCities() {
 
-  const cities = new Set<string>();
+  try {
 
-  // BUS
-  const { data: buses } = await supabase
-    .from("bus")
-    .select("From, To");
+    const response = await axios.get(
+      `${API_BASE_URL}/transport/cities`
+    );
 
-  buses?.forEach((bus: any) => {
-    if (bus.From) cities.add(bus.From);
-    if (bus.To) cities.add(bus.To);
-  });
+    return response.data.cities || [];
 
-  // TRAIN
-  const { data: trains } = await supabase
-    .from("train")
-    .select("source_station, destination_station");
+  } catch (error) {
 
-  trains?.forEach((train: any) => {
-    if (train.source_station)
-      cities.add(train.source_station);
+    console.log(error);
 
-    if (train.destination_station)
-      cities.add(train.destination_station);
-  });
-
-  // FLIGHT
-  const { data: flights } = await supabase
-    .from("flight")
-    .select("Source, destination");
-
-  flights?.forEach((flight: any) => {
-    if (flight.Source)
-      cities.add(flight.Source);
-
-    if (flight.destination)
-      cities.add(flight.destination);
-  });
-
-  return Array.from(cities).sort();
+    return [];
+  }
 }

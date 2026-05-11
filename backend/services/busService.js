@@ -1,31 +1,29 @@
-import axios from "axios";
+const Bus = require("../models/Bus");
 
-export const getBusRoutes = async ( source, destination, date) => {
+const getBusRoutes = async (
+  source,
+  destination,
+  date
+) => {
 
   try {
 
-    const response = await axios.get(
-      `${process.env.SUPABASE_URL}/rest/v1/bus`,
-      {
-        params: {
-          Source: `eq.${source}`,
-          Destination: `eq.${destination}`,
-          Date: `eq.${date}`
-        },
+    const buses = await Bus.find({
+      source: source.trim().toLowerCase(),
+      destination: destination.trim().toLowerCase(),
+      Date: date
+    });
 
-        headers: {
-          apikey: process.env.SUPABASE_API_KEY,
-          Authorization: `Bearer ${process.env.SUPABASE_API_KEY}`
-        }
-      }
-    );
-
-    return response.data;
+    return buses;
 
   } catch (error) {
 
-    console.log(error.response?.data || error.message);
+    console.log(error.message);
 
     return [];
   }
+};
+
+module.exports = {
+  getBusRoutes
 };

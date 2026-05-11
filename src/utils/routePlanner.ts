@@ -75,7 +75,7 @@ export function buildSmartRoutes(
       bus.Arrival
     );
 
-    const price = Number(bus.Price || 0);
+    const price = Number(bus.price || 0);
 
     routes.push({
       id: `bus-${index}`,
@@ -96,17 +96,17 @@ export function buildSmartRoutes(
         {
           mode: "bus",
 
-          from: bus.From,
+          from : bus.source,
 
-          to: bus.To,
+          to : bus.destination,
 
           duration,
 
           cost: price,
 
-          departureTime: bus.Departure,
+          departureTime: bus.departure_time,
 
-          arrivalTime: bus.Arrival,
+          arrivalTime: bus.arrival_time,
 
           delayRisk: 0.2,
         },
@@ -126,7 +126,7 @@ export function buildSmartRoutes(
       train.arrival_time
     );
 
-    const price = Number(train.Price || 0);
+    const price = Number(train.price || 0);
 
     routes.push({
       id: `train-${index}`,
@@ -147,9 +147,9 @@ export function buildSmartRoutes(
         {
           mode: "train",
 
-          from: train.source_station,
+          from: train.source,
 
-          to: train.destination_station,
+          to: train.destination,
 
           duration,
 
@@ -177,7 +177,7 @@ export function buildSmartRoutes(
       flight.Arrival_time
     );
 
-    const price = Number(flight.Price || 0);
+    const price = Number(flight.price || 0);
 
     routes.push({
       id: `flight-${index}`,
@@ -198,7 +198,7 @@ export function buildSmartRoutes(
         {
           mode: "flight",
 
-          from: flight.Source,
+          from: flight.source,
 
           to: flight.destination,
 
@@ -206,9 +206,9 @@ export function buildSmartRoutes(
 
           cost: price,
 
-          departureTime: flight.dep_time,
+          departureTime: flight.departure_time,
 
-          arrivalTime: flight.Arrival_time,
+          arrivalTime: flight.arrival_time,
 
           delayRisk: 0.05,
         },
