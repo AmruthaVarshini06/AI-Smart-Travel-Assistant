@@ -2,14 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMap,
-} from "react-leaflet";
-
+import {MapContainer,TileLayer,Marker,Popup,useMap,} from "react-leaflet";
+import {RouteSegment,} from "@/types/travel";
 import "leaflet/dist/leaflet.css";
 
 import L from "leaflet";
@@ -20,7 +14,10 @@ import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 interface InteractiveMapProps {
   source?: string;
   destination?: string;
+  segments: RouteSegment[];
   isSatellite?: boolean;
+  onPlaceClick?: (place: any) => void;
+  selectedPlaceId?: string;
 }
 
 function Routing({

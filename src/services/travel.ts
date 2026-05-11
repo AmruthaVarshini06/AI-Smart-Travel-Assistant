@@ -1,73 +1,86 @@
-import { supabase } from "@/lib/supabase";
+import axios from "axios";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:5000/api";
 
 export async function getBusData(
   source?: string,
   destination?: string
 ) {
-  let query = supabase.from("bus").select("*");
 
-  if (source) {
-    query = query.eq("From", source);
-  }
+  try {
 
-  if (destination) {
-    query = query.eq("To", destination);
-  }
+    const response = await axios.get(
+      `${API_BASE_URL}/transport/buses`,
+      {
+        params: {
+          source,
+          destination
+        }
+      }
+    );
 
-  const { data, error } = await query;
+    return response.data.buses || [];
 
-  if (error) {
-    console.error("BUS ERROR:", error);
+  } catch (error) {
+
+    console.log("BUS ERROR:", error);
+
     return [];
   }
-
-  return data;
 }
 
 export async function getTrainData(
   source?: string,
   destination?: string
 ) {
-  let query = supabase.from("train").select("*");
 
-  if (source) {
-    query = query.eq("source_station", source);
-  }
+  try {
 
-  if (destination) {
-    query = query.eq("destination_station", destination);
-  }
+    const response = await axios.get(
+      `${API_BASE_URL}/transport/trains`,
+      {
+        params: {
+          source,
+          destination
+        }
+      }
+    );
 
-  const { data, error } = await query;
+    return response.data.trains || [];
 
-  if (error) {
-    console.error("TRAIN ERROR:", error);
+  } catch (error) {
+
+    console.log("TRAIN ERROR:", error);
+
     return [];
   }
-
-  return data;
 }
 
 export async function getFlightData(
   source?: string,
   destination?: string
 ) {
-  let query = supabase.from("flight").select("*");
 
-  if (source) {
-    query = query.eq("Source", source);
-  }
+  try {
 
-  if (destination) {
-    query = query.eq("destination", destination);
-  }
+    const response = await axios.get(
+      `${API_BASE_URL}/transport/flights`,
+      {
+        params: {
+          source,
+          destination
+        }
+      }
+    );
 
-  const { data, error } = await query;
+    return response.data.flights || [];
 
-  if (error) {
-    console.error("FLIGHT ERROR:", error);
+  } catch (error) {
+
+    console.log("FLIGHT ERROR:", error);
+
     return [];
   }
-
-  return data;
 }
