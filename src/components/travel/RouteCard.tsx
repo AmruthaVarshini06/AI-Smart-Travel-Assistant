@@ -1,10 +1,10 @@
 "use client";
 
 import React from 'react';
-import { TravelRoute, TransportMode } from '@/lib/mock-data';
 import { Plane, Train, Bus, Car, ChevronRight, Clock, Wallet, ShieldCheck, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { TravelRoute, TransportMode } from '@/types/travel';
 
 interface RouteCardProps {
   route: TravelRoute;

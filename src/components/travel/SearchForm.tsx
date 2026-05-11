@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from "react";
 import { MapPin, Calendar, Search, ArrowRightLeft, Loader2, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { getBusData, getTrainData, getFlightData,} from "@/services/travel";
+import { getAllCities } from "@/services/cities";
 
 interface SearchFormProps {
   onSearch: (source: string, dest: string, date: string) => void;
@@ -19,6 +21,16 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
   const [dest, setDest] = React.useState('Bangalore');
   const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
   const [isListening, setIsListening] = React.useState(false);
+  const [cities, setCities] = useState<string[]>([]);
+
+  useEffect(() => {
+  async function loadCities() {
+    const data = await getAllCities();
+    setCities(data);
+  }
+
+  loadCities();
+}, []);
 
   const handleSwap = () => {
     setSource(dest);
@@ -79,12 +91,19 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">From</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-              <Input 
+              <input
+                list="source-cities"
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
-                className="pl-10 bg-slate-50 border-slate-200 h-12 rounded-2xl focus:bg-white transition-all" 
-                placeholder="Enter source city..." 
+                placeholder="Enter source city..."
+                className="pl-10 bg-slate-50 border border-slate-200 h-12 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm w-full"
               />
+
+              <datalist id="source-cities">
+                {cities.map((city) => (
+                  <option key={city} value={city} />
+                ))}
+              </datalist>
             </div>
           </div>
 
@@ -104,12 +123,19 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">To</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-              <Input 
+              <input
+                list="destination-cities"
                 value={dest}
                 onChange={(e) => setDest(e.target.value)}
-                className="pl-10 bg-slate-50 border-slate-200 h-12 rounded-2xl focus:bg-white transition-all" 
-                placeholder="Enter destination..." 
+                placeholder="Enter destination..."
+                className="pl-10 bg-slate-50 border border-slate-200 h-12 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm w-full"
               />
+
+              <datalist id="destination-cities">
+                {cities.map((city) => (
+                  <option key={city} value={city} />
+                ))}
+              </datalist>
             </div>
           </div>
 

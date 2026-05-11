@@ -87,11 +87,21 @@ const NeuralHub = () => {
 const Login = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = React.useState(false);
+  const [formData, setFormData] = React.useState({
+    fullName: '',
+    username: '',
+    email: '',
+    password: ''
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('user_name', formData.fullName || formData.username || 'Traveler');
+    localStorage.setItem('user_email', formData.email || `${formData.username}@example.com`);
+    
     showSuccess(isSignUp ? "Account created successfully!" : "Welcome back!");
-    navigate('/');
+    navigate('/'); // Redirect to Home page after login
   };
 
   return (
@@ -125,7 +135,7 @@ const Login = () => {
 
       <div className="w-full lg:w-1/2 flex flex-col p-8 lg:p-12 overflow-y-auto">
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
             <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20">
               <Plane className="text-white w-5 h-5" />
             </div>
@@ -170,6 +180,8 @@ const Login = () => {
                         <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                         <Input 
                           placeholder="John Doe" 
+                          value={formData.fullName}
+                          onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                           className="h-12 pl-11 rounded-xl border-slate-200 focus:ring-primary/20 focus:border-primary transition-all"
                         />
                       </div>
@@ -184,6 +196,8 @@ const Login = () => {
                   <AtSign className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   <Input 
                     placeholder="johndoe_travels" 
+                    value={formData.username}
+                    onChange={(e) => setFormData({...formData, username: e.target.value})}
                     className="h-12 pl-11 rounded-xl border-slate-200 focus:ring-primary/20 focus:border-primary transition-all"
                   />
                 </div>
@@ -197,6 +211,8 @@ const Login = () => {
                     <Input 
                       type="email" 
                       placeholder="name@example.com" 
+                      value={formData.email}
+                      onChange={(e) => setFormData({...formData, email: e.target.value})}
                       className="h-12 pl-11 rounded-xl border-slate-200 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                   </div>
@@ -217,20 +233,6 @@ const Login = () => {
                   />
                 </div>
               </div>
-
-              {isSignUp && (
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Confirm Password</label>
-                  <div className="relative">
-                    <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <Input 
-                      type="password" 
-                      placeholder="••••••••" 
-                      className="h-12 pl-11 rounded-xl border-slate-200 focus:ring-primary/20 focus:border-primary transition-all"
-                    />
-                  </div>
-                </div>
-              )}
 
               <Button className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold text-base gap-2 shadow-lg shadow-primary/20 transition-all hover:scale-[1.01] active:scale-[0.99] mt-2">
                 {isSignUp ? 'Create Account' : 'Sign In'} <ArrowRight className="w-5 h-5" />

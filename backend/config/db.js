@@ -1,6 +1,7 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const connectDB = async () => {
+<<<<<<< HEAD
   const mongoUri = process.env.MONGO_URI;
 
   if (!mongoUri || typeof mongoUri !== 'string') {
@@ -11,8 +12,26 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(mongoUri);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+=======
+
+  try {
+
+    await mongoose.connect(
+      process.env.MONGO_URI
+    );
+
+    console.log(
+      "MongoDB Connected"
+    );
+
+>>>>>>> origin/main
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+
+    console.log(
+      "MongoDB Error:",
+      error.message
+    );
+
     process.exit(1);
   }
 };
