@@ -1,6 +1,6 @@
 # Welcome to your AI-Smart-travel-Assistant app
 
-##📖 Description
+## 📖 Description
 
 AI Smart Travel Assistant is an intelligent travel planning system that helps users find the most efficient travel routes by integrating multiple transportation modes such as bus, train, and flight.
 
@@ -13,13 +13,13 @@ Provide real-time travel and weather insights
 
 The system simplifies travel planning by offering a single intelligent platform for complete journey management.
 
-##❗ Problem Statement
+## ❗ Problem Statement
 
 Users often struggle to find the most efficient travel option because existing platforms do not integrate bus, train, and flight services effectively. Current systems fail to consider important factors such as time, cost, distance, traffic, and weather together, leading to inefficient travel planning.
 
 Hence, there is a need for a smart travel assistant system that provides optimized, convenient, and intelligent route suggestions in one unified platform.
 
-##💡 Proposed Solution
+## 💡 Proposed Solution
 
 The proposed system is a Smart Travel Assistant Web Application that:
 
@@ -33,7 +33,7 @@ Provides interactive map visualization of trips
 
 This makes travel planning faster, smarter, and more reliable.
 
-##🧰 Technologies Used
+## 🧰 Technologies Used
 Frontend:
 React.js
 JavaScript
@@ -52,7 +52,7 @@ Transportation APIs (bus, train, flight data)
 Authentication:
 JWT (JSON Web Token)
 
-##🏗️ System Architecture
+## 🏗️ System Architecture
 
 The system follows a Three-Tier Architecture:
 
@@ -83,7 +83,7 @@ Processed Response Returned
 ⬇
 Frontend Displays Optimized Travel Plan
 
-##📌 In-Scope Features
+## 📌 In-Scope Features
 Travel route search and optimization
 Integration of bus, train, and flight services
 AI-based travel time and weather prediction
@@ -93,7 +93,7 @@ Interactive map visualization
 Real-time travel updates
 Secure authentication using JWT
 
-##🚫 Out-of-Scope Features
+## 🚫 Out-of-Scope Features
 International transportation systems
 Hotel and food booking services
 Real-time GPS tracking
@@ -101,7 +101,7 @@ Enterprise-level integrations
 Advanced chatbot assistance
 Offline travel planning
 
-##🚀 Future Enhancements
+## 🚀 Future Enhancements
 🌙 Dark mode and UI customization
 📩 Email notifications for delays and weather alerts
 📄 Downloadable PDF travel itinerary
