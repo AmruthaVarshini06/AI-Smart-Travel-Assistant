@@ -4,6 +4,7 @@ import React from 'react';
 import { Plane, Train, Bus, Car, ChevronRight, Clock, Wallet, ShieldCheck, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { TravelRoute, TransportMode } from '@/types/travel';
 
 interface RouteCardProps {
   route: TravelRoute;
