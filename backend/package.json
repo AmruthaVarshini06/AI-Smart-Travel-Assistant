@@ -16,5 +16,8 @@
     "groq-sdk": "^1.2.0",
     "mongoose": "^7.8.9",
     "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }
