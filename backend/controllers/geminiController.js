@@ -1,12 +1,13 @@
-import { processChat } from '../services/geminiService.js';
-import { sendSuccess } from '../utils/responseHelper.js';
+import { getAIResponse } from "../services/geminiService.js";
 
-export const chatWithAI = async (req, res, next) => {
+export const chatWithAI = async (req, res) => {
   try {
     const { message } = req.body;
-    const response = await processChat(message);
-    sendSuccess(res, response);
+
+    const reply = await getAIResponse(message);
+
+    res.json({ reply });
   } catch (error) {
-    next(error);
+    res.status(500).json({ error: "AI error" });
   }
 };

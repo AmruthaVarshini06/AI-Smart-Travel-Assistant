@@ -9,14 +9,21 @@ import {
 
 import polyline from "@mapbox/polyline";
 
+type Coordinates = {
+  lat: number;
+  lon: number;
+};
+
+type LatLngArray = [number, number];
+
 export default function MapView() {
   const [source, setSource] = useState("");
   const [destination, setDestination] = useState("");
 
-  const [sourceCoords, setSourceCoords] = useState<any>(null);
-  const [destCoords, setDestCoords] = useState<any>(null);
+  const [sourceCoords, setSourceCoords] = useState<Coordinates | null>(null);
+  const [destCoords, setDestCoords] = useState<Coordinates | null>(null);
 
-  const [route, setRoute] = useState<any[]>([]);
+  const [route, setRoute] = useState<LatLngArray[]>([]);
 
   async function getCoordinates(place: string) {
     const response = await fetch(
@@ -48,7 +55,7 @@ export default function MapView() {
 
     const encoded = data.routes[0].geometry;
 
-    const decoded = polyline.decode(encoded);
+    const decoded = polyline.decode(encoded) as LatLngArray[];
 
     setRoute(decoded);
   }

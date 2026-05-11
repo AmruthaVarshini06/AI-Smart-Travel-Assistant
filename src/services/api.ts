@@ -12,7 +12,7 @@ const api = axios.create({
 });
 
 export const transportApi = {
-  getRoutes: (params: any) => api.get('/transport/routes', { params }),
+  getRoutes: (params: Record<string, unknown>) => api.get('/transport/routes', { params }),
   getPredictions: (routeId: string) => api.get(`/transport/predict/${routeId}`),
 };
 

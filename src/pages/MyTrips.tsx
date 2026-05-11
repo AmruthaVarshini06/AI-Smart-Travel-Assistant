@@ -15,12 +15,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { showSuccess } from '@/utils/toast';
 
+import { TravelRoute } from '@/lib/mock-data';
+
+interface Trip {
+  id: string;
+  source: string;
+  destination: string;
+  date: string;
+  status: string;
+  mode: string;
+  cost: string;
+  fullRoute: TravelRoute;
+}
+
 const MyTrips = () => {
-  const [selectedTrip, setSelectedTrip] = React.useState<any | null>(null);
-  const [trips, setTrips] = React.useState<any[]>([]);
+  const [selectedTrip, setSelectedTrip] = React.useState<Trip | null>(null);
+  const [trips, setTrips] = React.useState<Trip[]>([]);
 
   const loadTrips = () => {
-    const storedTrips = JSON.parse(localStorage.getItem('bookedTrips') || '[]');
+    const storedTrips = JSON.parse(localStorage.getItem('bookedTrips') || '[]') as Trip[];
     setTrips(storedTrips);
   };
 

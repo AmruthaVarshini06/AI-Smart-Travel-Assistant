@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   Dialog,
@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { showSuccess } from "@/utils/toast";
+import { transportApi } from '@/services/api';
 
 import InteractiveMap from "./InteractiveMap";
 
@@ -47,6 +48,14 @@ interface RouteDetailsProps {
 
   showBooking?: boolean;
   isSatellite?: boolean;
+}
+
+interface RoutePrediction {
+  routeId: string;
+  predictedDelayMinutes: number;
+  probability: number;
+  confidence: number;
+  factors: string[];
 }
 
 const ModeIcon = ({
@@ -92,6 +101,38 @@ const RouteDetails = ({
   showBooking = true,
   isSatellite = false,
 }: RouteDetailsProps) => {
+  const [prediction, setPrediction] = useState<RoutePrediction | null>(null);
+  const [isPredicting, setIsPredicting] = useState(false);
+
+  useEffect(() => {
+    if (!route) {
+      setPrediction(null);
+      return;
+    }
+
+    let cancelled = false;
+    setIsPredicting(true);
+    setPrediction(null);
+
+    transportApi
+      .getPredictions(route.id)
+      .then((res) => {
+        if (!cancelled && res.data?.data) {
+          setPrediction(res.data.data);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPrediction(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsPredicting(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [route]);
+
   if (!route) return null;
 
   const isPastDate = searchedDate
@@ -261,7 +302,7 @@ const RouteDetails = ({
             </DialogHeader>
 
             {/* SUMMARY */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div
                 className="
                   bg-slate-50
@@ -322,6 +363,44 @@ const RouteDetails = ({
 
                 <p className="text-lg font-black text-primary">
                   ₹{route.totalCost.toLocaleString()}
+                </p>
+              </div>
+
+              <div
+                className="
+                  bg-slate-50
+                  p-4
+                  rounded-2xl
+                  border
+                  border-slate-100
+                  text-center
+                "
+              >
+                <p
+                  className="
+                    text-[9px]
+                    font-black
+                    text-slate-400
+                    uppercase
+                    tracking-widest
+                    mb-1
+                  "
+                >
+                  Predicted Delay
+                </p>
+
+                <p className="text-lg font-black text-slate-900">
+                  {isPredicting
+                    ? 'Analyzing...'
+                    : prediction
+                    ? `${prediction.predictedDelayMinutes} min`
+                    : 'N/A'}
+                </p>
+
+                <p className="text-xs text-slate-400 mt-1">
+                  {prediction
+                    ? `Confidence ${Math.round(prediction.confidence * 100)}%`
+                    : 'ML delay score'}
                 </p>
               </div>
             </div>

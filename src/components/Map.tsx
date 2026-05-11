@@ -12,11 +12,24 @@ import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 
 import "leaflet-routing-machine";
 
+type RoutingMachine = typeof L & {
+  Routing: {
+    control: (options: {
+      waypoints: L.LatLngExpression[];
+      routeWhileDragging: boolean;
+      lineOptions: {
+        styles: Array<{ color: string; weight: number }>;
+      };
+      createMarker: (i: number, wp: { latLng: L.LatLngExpression }) => L.Marker;
+    }) => L.Control;
+  };
+};
+
 function Routing() {
   const map = useMap();
 
   useEffect(() => {
-    const routingControl = (L as any).Routing.control({
+    const routingControl = (L as unknown as RoutingMachine).Routing.control({
       waypoints: [
         L.latLng(17.385, 78.4867),
         L.latLng(12.9716, 77.5946),
@@ -33,7 +46,7 @@ function Routing() {
         ],
       },
 
-      createMarker: function (_i: number, wp: any) {
+      createMarker: function (_i: number, wp: { latLng: L.LatLngExpression }) {
         return L.marker(wp.latLng);
       },
     }).addTo(map);

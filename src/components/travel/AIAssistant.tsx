@@ -55,13 +55,23 @@ const AIAssistant = ({ weather, distance }: AIAssistantProps) => {
       return;
     }
 
-    const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-    const recognition = new SpeechRecognition();
+    const speechApi = (window as unknown) as {
+      webkitSpeechRecognition?: typeof SpeechRecognition;
+      SpeechRecognition?: typeof SpeechRecognition;
+    };
+    const SpeechRecognitionClass = speechApi.webkitSpeechRecognition || speechApi.SpeechRecognition;
+
+    if (!SpeechRecognitionClass) {
+      showError("Speech recognition not supported in this browser");
+      return;
+    }
+
+    const recognition = new SpeechRecognitionClass();
     
     recognition.lang = 'en-US';
     recognition.onstart = () => setIsListening(true);
     recognition.onend = () => setIsListening(false);
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       setInput(transcript);
       handleSend(transcript);

@@ -70,9 +70,6 @@ const Index = () => {
       <main className="flex-1 pt-24 pb-12 px-4 lg:px-8 container mx-auto max-w-7xl">
         <DashboardHeader />
 
-        <div className="my-8">
-          <Map />
-        </div>
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
           {/* Left Column: Search and Routes */}
           <div className="xl:col-span-8 flex flex-col gap-8">

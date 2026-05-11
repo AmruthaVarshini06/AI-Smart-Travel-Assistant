@@ -1,4 +1,9 @@
-export async function getRoute(start: any, end: any) {
+export interface Coordinates {
+  lat: number;
+  lon: number;
+}
+
+export async function getRoute(start: Coordinates, end: Coordinates) {
   const apiKey = import.meta.env.VITE_ORS_API_KEY;
 
   const response = await fetch(
