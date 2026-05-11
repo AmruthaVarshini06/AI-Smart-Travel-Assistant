@@ -13,11 +13,13 @@ Provide real-time travel and weather insights
 
 The system simplifies travel planning by offering a single intelligent platform for complete journey management.
 
+
 ## ❗ Problem Statement
 
 Users often struggle to find the most efficient travel option because existing platforms do not integrate bus, train, and flight services effectively. Current systems fail to consider important factors such as time, cost, distance, traffic, and weather together, leading to inefficient travel planning.
 
 Hence, there is a need for a smart travel assistant system that provides optimized, convenient, and intelligent route suggestions in one unified platform.
+
 
 ## 💡 Proposed Solution
 
@@ -32,6 +34,7 @@ Offers alternative route suggestions
 Provides interactive map visualization of trips
 
 This makes travel planning faster, smarter, and more reliable.
+
 
 ## 🧰 Technologies Used
 Frontend:
@@ -51,6 +54,7 @@ Maps API (route visualization)
 Transportation APIs (bus, train, flight data)
 Authentication:
 JWT (JSON Web Token)
+
 
 ## 🏗️ System Architecture
 
@@ -102,9 +106,9 @@ Advanced chatbot assistance
 Offline travel planning
 
 ## 🚀 Future Enhancements
-🌙 Dark mode and UI customization
-📩 Email notifications for delays and weather alerts
-📄 Downloadable PDF travel itinerary
-🤖 AI chatbot for travel assistance
-🏨 Hotel & restaurant recommendations
-📱 Mobile application (Android & iOS)
+* 🌙 Dark mode and UI customization
+* 📩 Email notifications for delays and weather alerts
+* 📄 Downloadable PDF travel itinerary
+* 🤖 AI chatbot for travel assistance
+* 🏨 Hotel & restaurant recommendations
+* 📱 Mobile application (Android & iOS)
