@@ -21,7 +21,7 @@ import InteractiveMap from './InteractiveMap';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import axios from "axios";
+import { tripsApi } from "@/services/api";
 
 interface RouteDetailsProps {
   route: TravelRoute | null;
@@ -92,10 +92,7 @@ const RouteDetails = ({
 
   try {
 
-    const response = await axios.post(
-      "http://localhost:5000/api/trips/book",
-      tripData
-    );
+    await tripsApi.bookTrip(tripData);
 
     showSuccess("Trip booked successfully!");
 

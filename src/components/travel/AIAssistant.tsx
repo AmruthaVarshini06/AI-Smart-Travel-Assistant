@@ -1,17 +1,15 @@
 "use client";
 
 import React from 'react';
-import { Send, Mic, Sparkles, Volume2, RefreshCw, MessageSquare, Key } from 'lucide-react';
+import { Send, Mic, Sparkles, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { processChatQuery } from '@/services/aiService';
 import { showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
 
 const AIAssistant = ({ weather, distance }: { weather: string; distance: number }) => {
-  const navigate = useNavigate();
   const [isListening, setIsListening] = React.useState(false);
   const [input, setInput] = React.useState('');
   const [messages, setMessages] = React.useState([
@@ -19,8 +17,6 @@ const AIAssistant = ({ weather, distance }: { weather: string; distance: number 
   ]);
   const [isTyping, setIsTyping] = React.useState(false);
   const scrollRef = React.useRef<HTMLDivElement>(null);
-
-  const hasKey = !!(import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('VITE_GEMINI_API_KEY'));
 
   const suggestions = [
     "Suggest a 3-day itinerary for Goa",
@@ -47,8 +43,19 @@ const AIAssistant = ({ weather, distance }: { weather: string; distance: number 
     try {
       const response = await processChatQuery(messageText);
       setMessages(prev => [...prev, { role: 'ai', content: response }]);
-    } catch (err) {
-      showError("AI Service is currently unavailable");
+    } catch (err: any) {
+      const fallbackMessage =
+        err?.message ||
+        "AI Service is currently unavailable";
+
+      showError(fallbackMessage);
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'ai',
+          content: "I couldn't reach the assistant service. Please make sure the backend is running, then try again."
+        }
+      ]);
     } finally {
       setIsTyping(false);
     }
@@ -109,16 +116,6 @@ const AIAssistant = ({ weather, distance }: { weather: string; distance: number 
             )}>
               <div className="prose prose-sm prose-slate max-w-none whitespace-pre-wrap">
                 {msg.content}
-                {msg.content.includes("API Key Missing") && (
-                  <div className="mt-4">
-                    <Button 
-                      onClick={() => navigate('/profile')}
-                      className="bg-white text-primary hover:bg-slate-50 border-none font-black text-[10px] uppercase tracking-widest h-8 rounded-lg gap-2"
-                    >
-                      <Key size={12} /> Go to Profile
-                    </Button>
-                  </div>
-                )}
               </div>
             </div>
           </motion.div>
@@ -138,13 +135,6 @@ const AIAssistant = ({ weather, distance }: { weather: string; distance: number 
       </div>
 
       <div className="p-4 bg-white border-t border-slate-100 space-y-4">
-        {!hasKey && (
-          <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 flex items-center justify-between">
-            <p className="text-[10px] font-bold text-amber-700">AI is in demo mode. Add your API key to enable live chat.</p>
-            <Button size="sm" variant="ghost" onClick={() => navigate('/profile')} className="h-7 text-[9px] font-black uppercase text-amber-700 hover:bg-amber-100">Setup</Button>
-          </div>
-        )}
-
         {messages.length === 1 && (
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
             {suggestions.map((s, i) => (

@@ -12,6 +12,7 @@ import { WeatherCondition, TravelRoute } from '@/types/travel';
 import { fetchTravelPlan } from '@/lib/api';
 import { showError, showSuccess } from '@/utils/toast';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { healthApi } from '@/services/api';
 
 const Navigate = () => {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ const Navigate = () => {
   const [weather] = React.useState<WeatherCondition>('Clear');
   const [routes, setRoutes] = React.useState<TravelRoute[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [databaseStatus, setDatabaseStatus] = React.useState<'checking' | 'connected' | 'disconnected'>('checking');
   const [selectedRoute, setSelectedRoute] = React.useState<TravelRoute | null>(null);
   const [hasSearched, setHasSearched] = React.useState(false);
   
@@ -36,6 +38,25 @@ const Navigate = () => {
       navigate('/login');
     }
   }, [navigate]);
+
+  React.useEffect(() => {
+    const checkDatabase = async () => {
+      try {
+        const response =
+          await healthApi.getStatus();
+
+        setDatabaseStatus(
+          response.data.database?.connected
+            ? 'connected'
+            : 'disconnected'
+        );
+      } catch {
+        setDatabaseStatus('disconnected');
+      }
+    };
+
+    checkDatabase();
+  }, []);
 
   const loadRoutes = React.useCallback(async () => {
     setIsLoading(true);
@@ -83,7 +104,22 @@ const Navigate = () => {
       <main className="flex-1 pt-24 pb-12 px-4 lg:px-8 container mx-auto max-w-7xl">
         <div className="mb-8">
           <h1 className="text-3xl font-black tracking-tight">Navigate</h1>
-          <p className="text-slate-500 text-sm font-medium">Plan your optimized journey across multiple modes of transport.</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="text-slate-500 text-sm font-medium">Plan your optimized journey across multiple modes of transport.</p>
+            <span className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
+              databaseStatus === 'connected'
+                ? 'bg-emerald-50 text-emerald-600'
+                : databaseStatus === 'checking'
+                  ? 'bg-amber-50 text-amber-600'
+                  : 'bg-red-50 text-red-600'
+            }`}>
+              {databaseStatus === 'connected'
+                ? 'Database connected'
+                : databaseStatus === 'checking'
+                  ? 'Checking database'
+                  : 'Database offline'}
+            </span>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
@@ -108,14 +144,23 @@ const Navigate = () => {
                       ))}
                     </div>
                   ) : (
-                    routes.map((route, idx) => (
-                      <RouteCard 
-                        key={route.id} 
-                        route={route} 
-                        index={idx} 
-                        onViewDetails={(r) => setSelectedRoute(r)}
-                      />
-                    ))
+                    routes.length > 0 ? (
+                      routes.map((route, idx) => (
+                        <RouteCard 
+                          key={route.id} 
+                          route={route} 
+                          index={idx} 
+                          onViewDetails={(r) => setSelectedRoute(r)}
+                        />
+                      ))
+                    ) : (
+                      <div className="rounded-[2rem] border border-dashed border-slate-200 bg-white p-10 text-center">
+                        <p className="font-black text-slate-900">No database routes found</p>
+                        <p className="mt-2 text-sm font-medium text-slate-500">
+                          Add bus, train, or flight records for {searchParams.source} to {searchParams.dest}, then search again.
+                        </p>
+                      </div>
+                    )
                   )}
                 </div>
               </div>

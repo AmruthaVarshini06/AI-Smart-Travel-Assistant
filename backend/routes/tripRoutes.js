@@ -60,4 +60,35 @@ router.get(
   }
 );
 
+router.delete(
+  "/:id",
+  async (req, res) => {
+
+    try {
+
+      const trip =
+        await Trip.findByIdAndDelete(req.params.id);
+
+      if (!trip) {
+        return res.status(404).json({
+          success: false,
+          message: "Trip not found"
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Trip deleted successfully"
+      });
+
+    } catch (error) {
+
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+);
+
 export default router;

@@ -13,25 +13,50 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { showSuccess } from '@/utils/toast';
+import { showError, showSuccess } from '@/utils/toast';
+import { tripsApi } from '@/services/api';
 
 const MyTrips = () => {
   const [selectedTrip, setSelectedTrip] = React.useState<any | null>(null);
   const [trips, setTrips] = React.useState<any[]>([]);
 
-  const loadTrips = () => {
-    const storedTrips = JSON.parse(localStorage.getItem('bookedTrips') || '[]');
-    setTrips(storedTrips);
+  const loadTrips = async () => {
+    try {
+      const response =
+        await tripsApi.getTrips();
+
+      setTrips(response.data.trips || []);
+    } catch (error) {
+      const storedTrips =
+        JSON.parse(localStorage.getItem('bookedTrips') || '[]');
+
+      setTrips(storedTrips);
+      showError("Showing locally saved trips because the server is unavailable.");
+    }
   };
 
   React.useEffect(() => {
     loadTrips();
   }, []);
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    const updatedTrips = trips.filter(t => t.id !== id);
-    localStorage.setItem('bookedTrips', JSON.stringify(updatedTrips));
+
+    try {
+      await tripsApi.deleteTrip(id);
+    } catch (error) {
+      const localTrips =
+        JSON.parse(localStorage.getItem('bookedTrips') || '[]');
+
+      localStorage.setItem(
+        'bookedTrips',
+        JSON.stringify(localTrips.filter((t: any) => t.id !== id))
+      );
+    }
+
+    const updatedTrips =
+      trips.filter(t => (t._id || t.id) !== id);
+
     setTrips(updatedTrips);
     showSuccess("Trip removed successfully");
   };
@@ -69,7 +94,7 @@ const MyTrips = () => {
                 const status = getStatus(trip.date);
                 return (
                   <motion.div
-                    key={trip.id}
+                    key={trip._id || trip.id}
                     layout
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -109,7 +134,7 @@ const MyTrips = () => {
                             <DropdownMenuContent align="end" className="rounded-xl">
                               <DropdownMenuItem 
                                 className="text-red-500 focus:text-red-500 focus:bg-red-50 cursor-pointer gap-2 font-bold"
-                                onClick={(e) => handleDelete(trip.id, e)}
+                                onClick={(e) => handleDelete(trip._id || trip.id, e)}
                               >
                                 <Trash2 className="w-4 h-4" /> Remove Trip
                               </DropdownMenuItem>
@@ -129,7 +154,7 @@ const MyTrips = () => {
         </div>
 
         <RouteDetails 
-          route={selectedTrip?.fullRoute || null} 
+          route={selectedTrip?.full_route || selectedTrip?.fullRoute || null} 
           isOpen={!!selectedTrip} 
           onClose={() => setSelectedTrip(null)} 
           searchedSource={selectedTrip?.source}

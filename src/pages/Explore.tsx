@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import axios from "axios";
+import { tripsApi } from '@/services/api';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -178,10 +178,7 @@ const Explore = () => {
 
   try {
 
-    await axios.post(
-      "http://localhost:5000/api/trips/book",
-      tripData
-    );
+    await tripsApi.bookTrip(tripData);
 
     showSuccess(
       "Journey started successfully!"

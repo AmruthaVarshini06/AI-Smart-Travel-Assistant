@@ -8,7 +8,6 @@ import { Card } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
-import { getBusData, getTrainData, getFlightData,} from "@/services/travel";
 import { getAllCities } from "@/services/cities";
 
 interface SearchFormProps {
@@ -22,6 +21,18 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
   const [date, setDate] = React.useState(new Date().toISOString().split('T')[0]);
   const [isListening, setIsListening] = React.useState(false);
   const [cities, setCities] = useState<string[]>([]);
+
+  const cityOptions = React.useMemo(() => {
+    return Array.from(
+      new Set([
+        source,
+        dest,
+        ...cities
+      ].filter(Boolean))
+    ).sort((a, b) =>
+      a.localeCompare(b)
+    );
+  }, [cities, dest, source]);
 
   useEffect(() => {
   async function loadCities() {
@@ -81,19 +92,17 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">From</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-              <input
-                list="source-cities"
+              <select
                 value={source}
                 onChange={(e) => setSource(e.target.value)}
-                placeholder="Enter source city..."
-                className="pl-10 bg-slate-50 border border-slate-200 h-12 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm w-full"
-              />
-
-              <datalist id="source-cities">
-                {cities.map((city) => (
-                  <option key={city} value={city} />
+                className="pl-10 pr-9 bg-slate-50 border border-slate-200 h-12 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm w-full appearance-auto"
+              >
+                {cityOptions.map((city) => (
+                  <option key={`source-${city}`} value={city}>
+                    {city}
+                  </option>
                 ))}
-              </datalist>
+              </select>
             </div>
           </div>
 
@@ -113,19 +122,17 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
             <label className="text-xs font-bold uppercase tracking-wider text-slate-400 ml-1">To</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
-              <input
-                list="destination-cities"
+              <select
                 value={dest}
                 onChange={(e) => setDest(e.target.value)}
-                placeholder="Enter destination..."
-                className="pl-10 bg-slate-50 border border-slate-200 h-12 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm w-full"
-              />
-
-              <datalist id="destination-cities">
-                {cities.map((city) => (
-                  <option key={city} value={city} />
+                className="pl-10 pr-9 bg-slate-50 border border-slate-200 h-12 rounded-2xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm w-full appearance-auto"
+              >
+                {cityOptions.map((city) => (
+                  <option key={`destination-${city}`} value={city}>
+                    {city}
+                  </option>
                 ))}
-              </datalist>
+              </select>
             </div>
           </div>
 

@@ -31,4 +31,20 @@ export const aiApi = {
     api.post('/gemini/chat', { message }),
 };
 
+export const tripsApi = {
+  getTrips: () =>
+    api.get('/trips'),
+
+  bookTrip: (trip: any) =>
+    api.post('/trips/book', trip),
+
+  deleteTrip: (id: string) =>
+    api.delete(`/trips/${id}`),
+};
+
+export const healthApi = {
+  getStatus: () =>
+    api.get('/health'),
+};
+
 export default api;
