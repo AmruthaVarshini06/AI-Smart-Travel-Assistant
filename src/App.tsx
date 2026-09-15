@@ -27,19 +27,33 @@ const App = () => (
           <Toaster />
           <Sonner />
           
-          {/* I have completely removed the <Suspense> tags here! */}
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Index />} />
-            <Route path="/navigate" element={<Navigate />} />
-            <Route path="/trips" element={<MyTrips />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/assistant" element={<AIAssistantPage />} />
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          
+          {/* ✨ PROFESSIONAL UPGRADE: The Moving Pastel Background Wrapper */}
+          <div className="min-h-screen w-full bg-gradient-to-br from-[#f0fdf4] via-[#ecfdf5] to-[#fffbeb] animate-gradient-x relative overflow-x-hidden overflow-y-auto">
+            
+            {/* Soft, floating decorative pastel blobs for a premium, immersive feel */}
+            <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-emerald-200/30 rounded-full blur-[80px] pointer-events-none animate-pulse" />
+            <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-teal-200/30 rounded-full blur-[80px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }} />
+            <div className="absolute bottom-[-10%] left-[20%] w-[600px] h-[600px] bg-blue-200/30 rounded-full blur-[80px] pointer-events-none animate-pulse" style={{ animationDelay: '4s' }} />
+            <div className="absolute bottom-[20%] right-[20%] w-[300px] h-[300px] bg-orange-200/30 rounded-full blur-[80px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }} />
+
+            {/* The Actual App Content */}
+            <div className="relative z-10">
+              <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={<Index />} />
+                <Route path="/navigate" element={<Navigate />} />
+                <Route path="/trips" element={<MyTrips />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/explore" element={<Explore />} />
+                <Route path="/assistant" element={<AIAssistantPage />} />
+                <Route path="/alerts" element={<Alerts />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+
+          </div>
+          {/* END PREMIUM BACKGROUND */}
+
         </TooltipProvider>
       </AuthProvider>
     </BrowserRouter>

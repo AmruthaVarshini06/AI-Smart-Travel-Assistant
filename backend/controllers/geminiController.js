@@ -1,4 +1,5 @@
 import { sendSuccess } from '../utils/responseHelper.js';
+import Conversation from "../models/Conversation.js";
 
 // A local knowledge base to answer common questions instantly
 const getLocalTravelAnswer = (message) => {
@@ -110,7 +111,14 @@ export const chatWithAI = async (req, res, next) => {
     }
 
     const response = getLocalTravelAnswer(message);
-    sendSuccess(res, response);
+
+    sendSuccess(
+      res,
+      {
+        reply: response.message
+      },
+      "AI response generated"
+    );
   } catch (error) {
     next(error);
   }
@@ -153,5 +161,28 @@ export const chatWithAIStream = async (req, res, next) => {
     res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
     res.write('data: [DONE]\n\n');
     res.end();
+  }
+};
+
+export const getConversationHistory = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+
+    const conversation = await Conversation.findOne({ userId });
+
+    if (!conversation) {
+      return res.status(200).json({
+        success: true,
+        messages: []
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      messages: conversation.messages
+    });
+
+  } catch (error) {
+    next(error);
   }
 };

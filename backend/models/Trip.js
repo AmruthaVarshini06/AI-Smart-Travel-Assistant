@@ -1,7 +1,13 @@
 import mongoose from "mongoose";
 
-const tripSchema =
-  new mongoose.Schema({
+const tripSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true
+    },
 
     source: String,
 
@@ -16,10 +22,11 @@ const tripSchema =
     cost: Number,
 
     full_route: Object
-
-  }, {
+  },
+  {
     timestamps: true
-  });
+  }
+);
 
 const Trip = mongoose.model(
   "Trip",

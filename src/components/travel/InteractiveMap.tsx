@@ -1,70 +1,54 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  useMap,
+} from "react-leaflet";
 
-import {MapContainer,TileLayer,Marker,Popup,useMap,} from "react-leaflet";
-import {RouteSegment,} from "@/types/travel";
+import { RouteSegment } from "@/types/travel";
 import "leaflet/dist/leaflet.css";
 
-import L from "leaflet";
-
-import "leaflet-routing-machine";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
+interface MapPlace {
+  name: string;
+  type?: string;
+  mode?: string;
+  description?: string;
+}
 
 interface InteractiveMapProps {
   source?: string;
   destination?: string;
   segments: RouteSegment[];
   isSatellite?: boolean;
-  onPlaceClick?: (place: any) => void;
+
+  onPlaceClick?: (place: MapPlace) => void;
   selectedPlaceId?: string;
 }
 
-function Routing({
-  sourceCoords,
-  destinationCoords,
+const colors: Record<string, string> = {
+  flight: "#2563eb",
+  train: "#6366f1",
+  bus: "#f97316",
+  cab: "#16a34a",
+};
+
+function FitBounds({
+  positions,
 }: {
-  sourceCoords: [number, number];
-  destinationCoords: [number, number];
+  positions: [number, number][];
 }) {
   const map = useMap();
 
   useEffect(() => {
-    if (!map) return;
-
-    const routingControl: any = (L.Routing.control as any)({
-      waypoints: [
-        L.latLng(sourceCoords[0], sourceCoords[1]),
-        L.latLng(destinationCoords[0], destinationCoords[1]),
-      ],
-
-      routeWhileDragging: false,
-
-      lineOptions: {
-        styles: [
-          {
-            color: "#2563eb",
-            weight: 6,
-          },
-        ],
-      },
-
-      addWaypoints: false,
-      draggableWaypoints: false,
-      fitSelectedRoutes: true,
-      show: false,
-    }).addTo(map);
-
-    return () => {
-      try {
-        if (routingControl) {
-          map.removeControl(routingControl);
-        }
-      } catch (error) {
-        console.log("Routing cleanup skipped");
-      }
-    };
-  }, [map, sourceCoords, destinationCoords]);
+    if (positions.length >= 2) {
+      map.fitBounds(positions, { padding: [50, 50] });
+    }
+  }, [map, positions]);
 
   return null;
 }
@@ -72,77 +56,97 @@ function Routing({
 const InteractiveMap = ({
   source,
   destination,
+  segments,
   isSatellite,
+  onPlaceClick,
+  selectedPlaceId,
 }: InteractiveMapProps) => {
-  const [sourceCoords, setSourceCoords] = useState<
-    [number, number] | null
-  >(null);
+  const [coordinates, setCoordinates] = useState<
+    Record<string, [number, number]>
+  >({});
 
-  const [destinationCoords, setDestinationCoords] = useState<
-    [number, number] | null
-  >(null);
+  const [loading, setLoading] = useState(true);
 
-  async function getCoordinates(place: string) {
+  const getCoordinates = async (
+    place: string
+  ): Promise<[number, number] | null> => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?countrycodes=in&q=${encodeURIComponent(
-          place
-        )}&format=jsonv2`
+          `${place}, India`
+        )}&format=jsonv2&limit=1`
       );
 
       const data = await response.json();
 
-      console.log("ROUTE DATA:", data);
+      return data.length
+        ? [Number(data[0].lat), Number(data[0].lon)]
+        : null;
 
-      if (!data.length) return null;
-
-      return [
-        Number(data[0].lat),
-        Number(data[0].lon),
-      ] as [number, number];
     } catch (error) {
-      console.error(error);
+      console.error("Coordinate error:", error);
       return null;
     }
-  }
+  };
 
   useEffect(() => {
-    async function fetchCoordinates() {
-      if (!source || !destination) return;
+    const loadCoordinates = async () => {
+      setLoading(true);
 
-      console.log("SOURCE:", source);
-      console.log("DEST:", destination);
+      const places = new Set<string>();
 
-      const src = await getCoordinates(`${source}, India`);
-      const dest = await getCoordinates(`${destination}, India`);
+      if (source) places.add(source);
+      if (destination) places.add(destination);
 
-      console.log("SRC:", src);
-      console.log("DEST:", dest);
+      segments.forEach(({ from, to }) => {
+        if (from) places.add(from);
+        if (to) places.add(to);
+      });
 
-      if (src) setSourceCoords(src);
-      if (dest) setDestinationCoords(dest);
-    }
+      const results = await Promise.all(
+        [...places].map(async (place) => ({
+          place,
+          coords: await getCoordinates(place),
+        }))
+      );
 
-    fetchCoordinates();
-  }, [source, destination]);
+      const coords: Record<string, [number, number]> = {};
 
-  if (!sourceCoords || !destinationCoords) {
+      results.forEach(({ place, coords: location }) => {
+        if (location) coords[place] = location;
+      });
+
+      setCoordinates(coords);
+      setLoading(false);
+    };
+
+    loadCoordinates();
+  }, [source, destination, segments]);
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center w-full h-full bg-slate-100 rounded-[2rem] text-black">
-        Unable to load map coordinates
+      <div className="flex items-center justify-center w-full h-full min-h-[400px] bg-slate-100 rounded-[2rem]">
+        Loading route map...
       </div>
     );
   }
 
+  const sourceCoords = source ? coordinates[source] : undefined;
+  const destinationCoords = destination
+    ? coordinates[destination]
+    : undefined;
+
+  const positions = segments.flatMap((segment) => [
+    coordinates[segment.from],
+    coordinates[segment.to],
+  ]).filter(Boolean) as [number, number][];
+
   return (
-    <div className="relative w-full h-[100%] min-h-[400px] rounded-[2rem] overflow-hidden">
+    <div className="relative w-full h-full min-h-[400px] rounded-[2rem] overflow-hidden">
       <MapContainer
-        center={sourceCoords}
+        center={sourceCoords || [20.5937, 78.9629]}
         zoom={5}
-        style={{
-          height: "100%",
-          width: "100%",
-        }}
+        style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
           url={
@@ -150,25 +154,70 @@ const InteractiveMap = ({
               ? "https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png"
               : "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           }
-          attribution="&copy; OpenStreetMap contributors"
         />
 
-        <Marker position={sourceCoords}>
-          <Popup>
-            <strong>Source:</strong> {source}
-          </Popup>
-        </Marker>
+        {sourceCoords && (
+          <Marker position={sourceCoords}>
+            <Popup>
+              <strong>Source:</strong> {source}
+            </Popup>
+          </Marker>
+        )}
 
-        <Marker position={destinationCoords}>
-          <Popup>
-            <strong>Destination:</strong> {destination}
-          </Popup>
-        </Marker>
+        {destinationCoords && (
+          <Marker position={destinationCoords}>
+            <Popup>
+              <strong>Destination:</strong> {destination}
+            </Popup>
+          </Marker>
+        )}
 
-        <Routing
-          sourceCoords={sourceCoords}
-          destinationCoords={destinationCoords}
-        />
+        {segments.map((segment, index) => {
+          const from = coordinates[segment.from];
+          const to = coordinates[segment.to];
+
+          if (!from || !to) return null;
+
+          const mode = String(segment.mode).toLowerCase();
+
+          return (
+            <React.Fragment key={index}>
+              <Polyline
+                positions={[from, to]}
+                pathOptions={{
+                  color: colors[mode] || "#64748b",
+                  weight: 6,
+                  opacity: 0.85,
+                }}
+              />
+
+              {index > 0 && (
+  <Marker
+    position={from}
+    eventHandlers={{
+      click: () => {
+        onPlaceClick?.({
+          name: segment.from,
+          type: "stop",
+          mode,
+        });
+      },
+    }}
+  >
+    <Popup>
+      <strong>{segment.from}</strong>
+      <br />
+      Mode: {mode}
+    </Popup>
+  </Marker>
+)}
+            </React.Fragment>
+          );
+        })}
+
+        {positions.length >= 2 && (
+          <FitBounds positions={positions} />
+        )}
       </MapContainer>
 
       <div className="absolute bottom-4 left-4 z-[1000] bg-white p-4 rounded-2xl shadow-lg border border-slate-200">
@@ -176,27 +225,20 @@ const InteractiveMap = ({
           Transportation Modes
         </h4>
 
-        <div className="space-y-2 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-blue-500 rounded-full" />
-            <span>Flight</span>
+        {[
+          ["bg-blue-500", "Flight"],
+          ["bg-indigo-500", "Train"],
+          ["bg-orange-500", "Bus"],
+          ["bg-green-500", "Cab"],
+        ].map(([color, name]) => (
+          <div
+            key={name}
+            className="flex items-center gap-2 text-xs mb-2"
+          >
+            <div className={`w-4 h-1 ${color} rounded-full`} />
+            <span>{name}</span>
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-indigo-500 rounded-full" />
-            <span>Train</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-orange-500 rounded-full" />
-            <span>Bus</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-1 bg-green-500 rounded-full" />
-            <span>Cab</span>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

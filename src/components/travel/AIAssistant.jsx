@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Mic, Image, MoreVertical, Sparkles, Loader2, Bot, User } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import ReactMarkdown from 'react-markdown';
 
 const AIAssistant = ({ weather, distance }) => {
   const [messages, setMessages] = useState([
@@ -32,6 +33,30 @@ const AIAssistant = ({ weather, distance }) => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streamingContent]);
+
+    // Load past conversation history when the page loads
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!user?.id) return;
+      try {
+        const response = await fetch(`http://localhost:5000/api/conversations/${user.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.messages && data.messages.length > 0) {
+            // Only load if there are messages, and don't overwrite the default welcome message
+            setMessages(data.messages.map(msg => ({
+              ...msg,
+              id: msg._id || Date.now().toString(),
+              timestamp: new Date(msg.timestamp)
+            })));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load history", error);
+      }
+    };
+    loadHistory();
+  }, [user?.id]);
 
   // Focus input on mount
   useEffect(() => {
@@ -195,7 +220,15 @@ const AIAssistant = ({ weather, distance }) => {
                   : 'bg-white text-slate-800 border border-slate-200 rounded-bl-none'
               }`}
             >
-              <div className="whitespace-pre-wrap">{msg.content.replace(/\*\*/g, '')}</div>
+              <div className="prose prose-sm max-w-none text-slate-800">
+                <ReactMarkdown 
+                  components={{
+                    strong: ({node, ...props}) => <span className="font-bold text-slate-900" {...props} />
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              </div>
               <div className={`text-[10px] mt-1 ${
                 msg.role === 'user' ? 'text-blue-200' : 'text-slate-400'
               }`}>

@@ -146,7 +146,7 @@ const RouteDetails = ({
           <InteractiveMap 
             source={searchedSource || route.segments[0].from} 
             destination={searchedDest || route.segments[route.segments.length - 1].to} 
-            segments={route.segments}
+            segments={route?.segments || []}
             isSatellite={isSatellite}
             onPlaceClick={setSelectedPlace}
             selectedPlaceId={selectedPlace?.name}

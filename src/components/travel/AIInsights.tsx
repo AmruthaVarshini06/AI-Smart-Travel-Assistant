@@ -26,7 +26,15 @@ const AIInsights = () => {
               <span className="text-slate-500 font-medium">Route Reliability Score</span>
               <span className="font-bold text-emerald-500">94%</span>
             </div>
-            <Progress value={94} className="h-2 bg-slate-100" />
+            
+            {/* ✨ THE UPGRADED PREMIUM PROGRESS BAR ✨ */}
+            <div className="relative h-3 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div 
+                className="h-full w-[94%] bg-gradient-to-r from-emerald-400 to-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.3)] transition-all duration-1000 ease-out" 
+                style={{ width: '94%' }}
+              />
+            </div>
+            {/* ------------------------------------- */}
           </div>
 
           <div className="grid grid-cols-2 gap-4">

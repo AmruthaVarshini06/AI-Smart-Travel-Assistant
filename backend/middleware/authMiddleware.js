@@ -29,8 +29,9 @@ const authMiddleware = (req, res, next) => {
 
     if (!token) {
       return res.status(401).json({
-        message: "Access denied",
-      });
+      success: false,
+      message: "Access denied",
+    });
     }
 
     const verified = jwt.verify(token, getJwtSecret());
@@ -40,6 +41,7 @@ const authMiddleware = (req, res, next) => {
   } catch (error) {
     console.error("Auth middleware error:", error);
     res.status(401).json({
+      success: false,
       message: "Invalid token",
     });
   }

@@ -6,7 +6,7 @@ import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, AreaChart,
 import { PRICE_TRENDS, DELAY_DATA } from "@/types/travel";
 
 export const WeatherWidget = () => (
-  <div className="glass-card p-6 rounded-[2rem] space-y-6">
+  <div className="bg-white/70 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] space-y-6">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <div className="bg-blue-400/10 p-2 rounded-xl">
@@ -47,7 +47,7 @@ export const WeatherWidget = () => (
 );
 
 export const PricePrediction = () => (
-  <div className="glass-card p-6 rounded-[2rem] space-y-4">
+  <div className="bg-white/70 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] space-y-6">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <div className="bg-emerald-400/10 p-2 rounded-xl">
@@ -78,7 +78,7 @@ export const PricePrediction = () => (
 );
 
 export const CO2Comparison = () => (
-  <div className="glass-card p-6 rounded-[2rem] space-y-6">
+  <div className="bg-white/70 backdrop-blur-md border border-white/60 shadow-xl shadow-slate-200/50 p-6 rounded-[2rem] space-y-6">
     <div className="flex items-center gap-2">
       <div className="bg-green-400/10 p-2 rounded-xl">
         <Leaf className="text-green-400 w-5 h-5" />
